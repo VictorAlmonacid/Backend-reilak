@@ -187,18 +187,12 @@ const AddMembersChat = async(payload)=>{
   return member;
 }
 const readMessage = async(payload)=>{
-  // console.log('readMessage ',payload.data.uid);
-  // console.log('readMessage2 ',payload.data.id.id);
-
-  const messageNoRead = await Message.find({$and:[{'to':payload.data.id.id},{'viewedby':{$ne:ObjectId(payload.data.uid)}}]});
+  const messageNoRead = await Message.find({$and:[{'to':payload.data.id.id},{"viewedby._id":{$ne:ObjectId(payload.data.uid)}}]});
     for(let i=0;i<messageNoRead.length;i++){
-      await Message.findByIdAndUpdate(messageNoRead[i]._id, {$push:{viewedby:payload.data.uid}}, {new: true});
+      await Message.findByIdAndUpdate(messageNoRead[i]._id, {$push:{viewedby:{_id:payload.data.uid, fecha: new Date()}}}, {new: true});
     }
-    // console.log('196 ',messageNoRead)
     const message = await Message.find({'to':payload.data.id.id}).limit(1).sort({"_id":-1});
-    // console.log('200',message)
     const act = await Chat.findByIdAndUpdate(payload.data.id.id,{'$set':{'lastmessage':message}},{new:true});
-    // console.log('202',act.lastmessage)
     return act;
 }
 

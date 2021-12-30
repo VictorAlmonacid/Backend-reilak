@@ -27,9 +27,13 @@ class Sockets {
 
     socketEvents() {
         // On connection
+        let [valido, uid] = '';
         this.io.on('connection', async (socket) => {
-            const [valido, uid] = comprobarJWT(socket.handshake.query['x-token'])
-
+            if(socket.handshake.query['x-token']){
+                [valido, uid]  = comprobarJWT(socket.handshake.query['x-token'])
+            }else{
+                [valido, uid] = comprobarJWT(socket.handshake.headers['x-token'])
+            }
             if (!valido) {
                 console.log('socket no identificado');
                 return socket.disconnect();
@@ -128,9 +132,7 @@ class Sockets {
             
             socket.on('read-last-message', async (payload) => {
                 const chat = await readMessage(payload);
-                // console.log('131 ',chat);
                 for (let i = 0; i < chat.members.length; i++) {
-
                     this.io.to(chat.members[i].toString()).emit('reading-last-messge', chat);
                 }
            

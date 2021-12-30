@@ -16,10 +16,14 @@ const MessageSchema = Schema({
     message:{
         type: String,
     },
-    viewedby:[{
-        type: Schema.Types.ObjectId, 
-        default: [],
-        ref: 'Usuario',
+    viewedby:[{      
+            id: {
+                type: Schema.Types.ObjectId, 
+            },
+            fecha:{
+                type: Date,
+                default: Date.now,
+            },       
     }],
     
 });

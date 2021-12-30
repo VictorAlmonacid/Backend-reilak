@@ -8,7 +8,7 @@ const ConexionSchema = Schema({
     },
     fechatermino:{
         type: Date,
-        default: null
+        default: Date.now,
         
     },
     usuario:{
