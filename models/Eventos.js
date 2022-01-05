@@ -12,16 +12,16 @@ const EventSchema = Schema({
         type: Date,
         required: true
     },
-    categoria: {
-        type: String,
-        default: 'Actividad',
-    },
     end: {
         type: Date,
         required: true
     },
     tipo: {
         type: String,
+    },
+    categoria: {
+        type: String,
+        default: "Corporativo",
     },
     reunion: [{
         type: [String],
@@ -38,7 +38,7 @@ const EventSchema = Schema({
     },
 });
 
-EventSchema.method('toJSON', function() {
+EventSchema.method('toJSON', function () {
     const { __v, _id, ...Object } = this.toObject();
     Object.id = _id;
     return Object;

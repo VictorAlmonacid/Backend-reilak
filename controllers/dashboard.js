@@ -4,6 +4,7 @@ const conexion = require('../models/Conexion');
 const Eventos = require('../models/Eventos');
 const Publicaciones = require('../models/Posts');
 const usuarios = require('../models/Usuarios');
+const tarea = require('../models/Tareas');
 
 
 //GENERAL - CANTIDAD USUARIOS
@@ -419,8 +420,247 @@ const dRadioUC = async (req, res = response) => {
     })
 }
 
+//RADIO - CONEXIONES POR FECHAS
+const dTotalTC = async (req, res = response) => {
+    console.log("req.body", req.body);
+    const tiempoConexion = await conexion.aggregate([
+        {
+            $project: {
+                _id: 0,
+                fechainicio: 1,
+                fechatermino: 1,
+                usuario: 1,
+                result: {
+                    $subtract: ["$fechatermino", "$fechainicio"]
+                }
+            }
+        },
+        // etapa $match
+        {
+            $match: {
+                $and: [{ fechainicio: { '$gte': new Date("2021-12-030T00:00:00.000+00:00"), '$lte': new Date("2022-01-01T00:00:00.000+00:00") } }]
+            }
+        },
+        { $group: { _id: "$usuario", "tiempo": { $sum: "$result" }, } }
+    ])
+    res.json({
+        ok: true,
+        tiempoConexion,
+    })
+}
 
 
+//Prueba - Conexiones por fechas
+const dPruebaCF = async (req, res = response) => {
+    console.log(req.body.start);
+    const inicio = req.body.start;
+    const final = req.body.end;
+    const tiempoConexion = await conexion.aggregate([
+        {
+            $project: {
+                _id: 0,
+                fechainicio: 1,
+                fechatermino: 1,
+                usuario: 1,
+                result: {
+                    $subtract: ["$fechatermino", "$fechainicio"]
+                },
+
+            }
+        },
+        { $group: { _id: "TotalConexiones", "tiempo": { $sum: "$result" }, } }
+    ])
+    res.json({
+        ok: true,
+        tiempoConexion,
+    })
+}
+
+//Valores - Cantidad Chats
+const dValoresCC = async (req, res = response) => {
+    const chats = await Chat.find();
+    res.json({
+        ok: true,
+        chats,
+    })
+}
+
+//Valores - Cantidad Chats
+const dValoresCCP = async (req, res = response) => {
+    const chats = await Chat.find({ tipo: "personal" });
+    res.json({
+        ok: true,
+        chats,
+    })
+}
+
+//Valores - Cantidad Chats
+const dValoresCCG = async (req, res = response) => {
+    const chats = await Chat.find({ tipo: "grupo" });
+    res.json({
+        ok: true,
+        chats,
+    })
+}
+
+//Valores - Cantidad Chats
+const dValoresCCC = async (req, res = response) => {
+    const chats = await Chat.find({ tipo: "canal" });
+    res.json({
+        ok: true,
+        chats,
+    })
+}
+
+//Valores - Cantidad Tareas
+const dValoresCT = async (req, res = response) => {
+    const tareas = await tarea.aggregate([
+        {
+            $lookup: {
+                from: "usuarios",
+                localField: "usuario",
+                foreignField: "_id",
+                as: "usuario",
+            },
+        },
+        { $unwind: "$usuario" },
+        // { $match: { estado: false } },
+        // { $sort: { fecha: -1 } },
+        // { $limit: 10 },
+
+        {
+            $project: {
+                name: "$usuario.name",
+                segundoNombre: "$usuario.segundoNombre",
+                apellidoPaterno: "$usuario.apellidoPaterno",
+                apellidoMaterno: "$usuario.apellidoMaterno",
+                imgusuario: "$usuario.imgusuario",
+                titulo: 1,
+                contenido: 1,
+                fechaCreacion: 1,
+                fechaTermino: 1,
+                estado: 1
+            },
+        },
+    ]);
+    res.json({
+        ok: true,
+        tareas,
+    })
+}
+
+//Valores - Cantidad Tareas en Proceso
+const dValoresCTP = async (req, res = response) => {
+    const tareas = await tarea.aggregate([
+        {
+            $lookup: {
+                from: "usuarios",
+                localField: "usuario",
+                foreignField: "_id",
+                as: "usuario",
+            },
+        },
+        { $unwind: "$usuario" },
+        { $match: { estado: false } },
+        { $match: { fechaTermino: { '$gte': new Date() } } },
+        // { $sort: { fecha: -1 } },
+        // { $limit: 10 },
+
+        {
+            $project: {
+                name: "$usuario.name",
+                segundoNombre: "$usuario.segundoNombre",
+                apellidoPaterno: "$usuario.apellidoPaterno",
+                apellidoMaterno: "$usuario.apellidoMaterno",
+                imgusuario: "$usuario.imgusuario",
+                titulo: 1,
+                contenido: 1,
+                fechaCreacion: 1,
+                fechaTermino: 1,
+                estado: 1
+            },
+        },
+    ]);
+    res.json({
+        ok: true,
+        tareas,
+    })
+}
+
+//Valores - Cantidad Tareas Atrasadas
+const dValoresCTA = async (req, res = response) => {
+    const tareas = await tarea.aggregate([
+        {
+            $lookup: {
+                from: "usuarios",
+                localField: "usuario",
+                foreignField: "_id",
+                as: "usuario",
+            },
+        },
+        { $unwind: "$usuario" },
+        { $match: { estado: false } },
+        { $match: { fechaTermino: { '$lt': new Date() } } },
+        // { $sort: { fecha: -1 } },
+        // { $limit: 10 },
+
+        {
+            $project: {
+                name: "$usuario.name",
+                segundoNombre: "$usuario.segundoNombre",
+                apellidoPaterno: "$usuario.apellidoPaterno",
+                apellidoMaterno: "$usuario.apellidoMaterno",
+                imgusuario: "$usuario.imgusuario",
+                titulo: 1,
+                contenido: 1,
+                fechaCreacion: 1,
+                fechaTermino: 1,
+                estado: 1
+            },
+        },
+    ]);
+    res.json({
+        ok: true,
+        tareas,
+    })
+}
+
+//Valores - Cantidad Tareas Completadas
+const dValoresCTC = async (req, res = response) => {
+    const tareas = await tarea.aggregate([
+        {
+            $lookup: {
+                from: "usuarios",
+                localField: "usuario",
+                foreignField: "_id",
+                as: "usuario",
+            },
+        },
+        { $unwind: "$usuario" },
+        { $match: { estado: true } },
+        // { $sort: { fecha: -1 } },
+        // { $limit: 10 },
+
+        {
+            $project: {
+                name: "$usuario.name",
+                segundoNombre: "$usuario.segundoNombre",
+                apellidoPaterno: "$usuario.apellidoPaterno",
+                apellidoMaterno: "$usuario.apellidoMaterno",
+                imgusuario: "$usuario.imgusuario",
+                titulo: 1,
+                contenido: 1,
+                fechaCreacion: 1,
+                fechaTermino: 1,
+                estado: 1
+            },
+        },
+    ]);
+    res.json({
+        ok: true,
+        tareas,
+    })
+}
 
 //MODULOS EXPORTADOS
 module.exports = {
@@ -439,5 +679,15 @@ module.exports = {
     dRadioEC,
     dRadioGU,
     dValoresCU,
-    dRadioUC
+    dRadioUC,
+    dTotalTC,
+    dPruebaCF,
+    dValoresCC,
+    dValoresCT,
+    dValoresCCP,
+    dValoresCCG,
+    dValoresCCC,
+    dValoresCTP,
+    dValoresCTA,
+    dValoresCTC
 }

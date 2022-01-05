@@ -3,7 +3,8 @@ const { stringify } = require("uuid");
 const ObjectId = require('mongoose').Types.ObjectId;
 const Usuarios = require("../models/Usuarios");
 const Birthday = require("../models/Cumpleaños");
-
+const cloudinary = require('cloudinary').v2;
+cloudinary.config(process.env.CLOUDINARY_URL);
 
 const listarCumpleañeros = async (req, res = response) => {
   const uid = req.uid;
@@ -68,29 +69,51 @@ if(birthday.length>0){
 
 
 const createBirthday = async(req, res= response) => {
+
+  console.log('bod: ', req.body);
+  console.log('fil: ',req.files);
   
   const birthday = new Birthday(req.body);
   birthday.felicitado=req.body.felicitado;
   birthday.felicitador=req.uid;
-  console.log(birthday);
+  const filesUrl = [];
   try{
 
+    if (req.files) {
 
-                
-   
+      if(req.files.multimedia.length > 1){
+          for (let i = 0; i < req.files.multimedia.length; i++) {
+              let {tempFilePath} = req.files.multimedia[i];
+              let {secure_url} = await cloudinary.uploader.upload(tempFilePath, { resource_type: "auto" });
+              filesUrl.push(secure_url);
+          }
+      }else{
+          let {tempFilePath} = req.files.multimedia;
+          let {secure_url} = await cloudinary.uploader.upload(tempFilePath, { resource_type: "auto" });
+          filesUrl.push(secure_url);
+      }
+
+
+
+      birthday.felitador = req.uid;
+      birthday.multimedia = filesUrl;
+      //  publicacion.reaccion= req.uid;
+       const felitadorGuardados = await birthday.save();
+        res.status(201).json({
+           ok: true,
+           birthday: felitadorGuardados
+       });
+
+
+  }else{
     birthday.felitador = req.uid;
-          //  publicacion.reaccion= req.uid;
-           const felitadorGuardados = await birthday.save();
-            res.status(201).json({
-               ok: true,
-               birthday: felitadorGuardados
-           })
-
-     
-
-      
-   
-
+    //  publicacion.reaccion= req.uid;
+     const felitadorGuardados = await birthday.save();
+      res.status(201).json({
+         ok: true,
+         birthday: felitadorGuardados
+     });
+  }
   }catch(error){
       console.log(error);
       res.status(500).json({
@@ -99,6 +122,23 @@ const createBirthday = async(req, res= response) => {
       });
   }
 
+}
+
+const changeViewedBirthday = async (req, res = response) => {
+
+  const birthdayId = req.body.post?req.body.post:req.params.id;
+  try{
+      const messageBirthday = await Birthday.findByIdAndUpdate(birthdayId, {visto: true}, {new: true});
+      res.json({
+          ok: true,
+          messageBirthday
+      })
+  }catch(error){
+      res.status(500).json({
+          ok:false,
+          msg: 'Hable con el administrador'
+      })
+  }
 }
 
 const listarMessageBirthday = async (req, res = response) => {
@@ -131,6 +171,7 @@ const listarMessageBirthday = async (req, res = response) => {
      },
      {$unwind:"$userFelicitador"},
      { $match : { felicitado: ObjectId(uid)} }, 
+     { $match : { visto: false }}
 
 
 
@@ -149,4 +190,5 @@ module.exports = {
   listarCumpleañeros,
   createBirthday,
   listarMessageBirthday,
+  changeViewedBirthday,
 };

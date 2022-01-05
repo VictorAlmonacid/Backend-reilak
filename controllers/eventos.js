@@ -15,10 +15,38 @@ const listarEventos = async (req, res = response) => {
 
 const listarEventosCercanos = async (req, res = response) => {
 
-    const eventos = await Evento.find()
-        .sort({ fecha: -1 })
-        .limit(3);
-
+    // const eventos = await Evento.find()
+    //     .sort({ fecha: -1 })
+    //     .limit(4);
+    const eventos = await Evento.aggregate([
+        {
+            $lookup: {
+                from: "usuarios",
+                localField: "usuario",
+                foreignField: "_id",
+                as: "usuario",
+            },
+        },
+        { $unwind: "$usuario" },
+        { $match: { end: { '$gte': new Date() } } },
+        // { $match: { tipo: "Evento" } },
+        { $sort: { end: 1 } },
+        { $limit: 3 },
+        {
+            $project: {
+                id_usuario: "$usuario.id",
+                name: "$usuario.name",
+                segundoNombre: "$usuario.segundoNombre",
+                apellidoPaterno: "$usuario.apellidoPaterno",
+                apellidoMaterno: "$usuario.apellidoMaterno",
+                imgusuario: "$usuario.imgusuario",
+                tipo: 1,
+                titulo: 1,
+                start: 1,
+                reunion: 1,
+            },
+        },
+    ]);
     res.json({
         ok: true,
         eventos

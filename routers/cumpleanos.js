@@ -4,7 +4,7 @@ const {check} = require('express-validator');
 
 const {validarCampos} = require('../middlewares/validar-campos');
 const {validarJWT} = require('../middlewares/validat-jwt');
-const {listarCumpleañeros, createBirthday, listarMessageBirthday} = require('../controllers/cumpleaño');
+const {listarCumpleañeros, createBirthday, listarMessageBirthday, changeViewedBirthday} = require('../controllers/cumpleaño');
 // const { coleccionesPermitidas } = require('../helpers');
 
 
@@ -21,6 +21,8 @@ router.get('/', listarCumpleañeros);
 router.get('/message', listarMessageBirthday);
 
 router.post('/', createBirthday);
+
+router.put('/:id', changeViewedBirthday);
 //Crear una nueva publicacion
 
 // router.post('/',    [

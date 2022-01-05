@@ -187,6 +187,7 @@ const AddMembersChat = async(payload)=>{
   return member;
 }
 const readMessage = async(payload)=>{
+  console.log('hpy: ', payload);
   const messageNoRead = await Message.find({$and:[{'to':payload.data.id.id},{"viewedby._id":{$ne:ObjectId(payload.data.uid)}}]});
     for(let i=0;i<messageNoRead.length;i++){
       await Message.findByIdAndUpdate(messageNoRead[i]._id, {$push:{viewedby:{_id:payload.data.uid, fecha: new Date()}}}, {new: true});

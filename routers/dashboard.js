@@ -20,7 +20,17 @@ const {
     dRadioGU,
     dValoresCU,
     dRadioUC,
-    dUsuariosC
+    dUsuariosC,
+    dTotalTC,
+    dPruebaCF,
+    dValoresCC,
+    dValoresCT,
+    dValoresCCG,
+    dValoresCCP,
+    dValoresCCC,
+    dValoresCTP,
+    dValoresCTA,
+    dValoresCTC
 } = require('../controllers/dashboard');
 
 const router = Router();
@@ -75,5 +85,35 @@ router.get('/dvalorescu', dValoresCU);
 
 //Radios - Eventos por categoria
 router.get('/dradiouc', dRadioUC);
+
+//Radios - Total tiempo conexion
+router.post('/ttc/', dTotalTC);
+
+// //Radios - Total tiempo conexion
+router.get('/prcf', dPruebaCF);
+
+//Valores - Cantidad Chats
+router.get('/dvalorescc', dValoresCC);
+
+//Valores - Cantidad Chats Personal
+router.get('/dvaloresccp', dValoresCCP);
+
+//Valores - Cantidad Chats Grupal
+router.get('/dvaloresccg', dValoresCCG);
+
+//Valores - Cantidad Chats Canal
+router.get('/dvaloresccc', dValoresCCC);
+
+//Valores - Cantidad Tareas
+router.get('/dvaloresct', dValoresCT);
+
+//Valores - Cantidad Tareas en Proceso
+router.get('/dvaloresctp', dValoresCTP);
+
+//Valores - Cantidad Tareas Atrasadas
+router.get('/dvalorescta', dValoresCTA);
+
+//Valores - Cantidad Tareas Completadas
+router.get('/dvaloresctc', dValoresCTC);
 
 module.exports = router;

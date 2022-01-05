@@ -6,7 +6,7 @@ const cloudinary = require('cloudinary').v2
 cloudinary.config(process.env.CLOUDINARY_URL);
 
 //LISTAR
-const listarUsuarios = async(req, res = response) => {
+const listarUsuarios = async (req, res = response) => {
 
     const usuario = await Usuarios.find()
 
@@ -17,7 +17,7 @@ const listarUsuarios = async(req, res = response) => {
     })
 }
 
-const buscarUsuarios = async(req, res = response) => {
+const buscarUsuarios = async (req, res = response) => {
 
     const usuario = await Usuarios.find()
 
@@ -28,13 +28,13 @@ const buscarUsuarios = async(req, res = response) => {
     })
 }
 
-const listaCumplea単os = async(req, res = response) => {
+const listaCumplea単os = async (req, res = response) => {
     fecha = new Date();
     filtra = fecha.toLocaleDateString();
     console.log(filtra)
     const publicaciones = await Usuarios.findOne({ "nacimiento": /.*04-30*./ })
     console.log(publicaciones)
-        // /.*0{4-30}.*/
+    // /.*0{4-30}.*/
     res.json({
         ok: true,
         publicaciones
@@ -42,7 +42,7 @@ const listaCumplea単os = async(req, res = response) => {
 }
 
 //CREAR
-const crearUsuario = async(req, res = response) => {
+const crearUsuario = async (req, res = response) => {
     console.log("crearusaurio")
     const usuario = new Usuarios(req.body);
     console.log(usuario)
@@ -51,6 +51,9 @@ const crearUsuario = async(req, res = response) => {
             const { tempFilePath } = req.files.imgusuario;
             const { secure_url } = await cloudinary.uploader.upload(tempFilePath, { resource_type: "auto" });
             usuario.imgusuario = secure_url;
+            console.log(req.body.password);
+            const salt = bcrypt.genSaltSync();
+            usuario.password = bcrypt.hashSync(usuario.password, salt);
             const usuarioGuardado = await usuario.save();
             console.log(usuarioGuardado)
             res.json({
@@ -59,6 +62,8 @@ const crearUsuario = async(req, res = response) => {
             })
         } else {
             console.log("req", req.body)
+            const salt = bcrypt.genSaltSync();
+            req.body.password = bcrypt.hashSync(req.body.password, salt);
             const usuarioGuardado = await usuario.save();
             console.log(usuarioGuardado)
             res.json({
@@ -76,7 +81,7 @@ const crearUsuario = async(req, res = response) => {
 }
 
 
-const actualizarUsuario = async(req, res = response) => {
+const actualizarUsuario = async (req, res = response) => {
     const publicacionId = req.body.id;
     try {
         if (req.files) {
@@ -98,7 +103,7 @@ const actualizarUsuario = async(req, res = response) => {
             }
             if (req.body.password) {
                 console.log("UserPassword", req.body.password)
-                    // Encriptar contrase単a
+                // Encriptar contrase単a
                 const salt = bcrypt.genSaltSync();
                 req.body.password = bcrypt.hashSync(req.body.password, salt);
             }
@@ -121,7 +126,6 @@ const actualizarUsuario = async(req, res = response) => {
             }
             if (req.body.password) {
                 console.log("UserPassword", req.body.password)
-                    // Encriptar contrase単a
                 const salt = bcrypt.genSaltSync();
                 req.body.password = bcrypt.hashSync(req.body.password, salt);
             }
@@ -142,7 +146,7 @@ const actualizarUsuario = async(req, res = response) => {
     }
 }
 
-const eliminarUsuario = async(req, res = response) => {
+const eliminarUsuario = async (req, res = response) => {
     const usuarioId = req.params.id;
     try {
 
@@ -167,12 +171,12 @@ const eliminarUsuario = async(req, res = response) => {
         })
     }
 }
-const  listarUsuariosChat  =  async ( )  =>  {
+const listarUsuariosChat = async () => {
 
-    const  usuario  =  await  Usuarios.find ( )
+    const usuario = await Usuarios.find()
 
 
-    return  usuario ;
+    return usuario;
 }
 
 module.exports = {

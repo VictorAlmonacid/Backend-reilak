@@ -20,6 +20,13 @@ const BirthdaySchema = Schema({
         type: Schema.Types.ObjectId, 
         ref: 'Usuario',
     },
+    multimedia: {
+        type: Array,
+    },
+    visto: {
+        type: Boolean,
+        default: false
+    }
 
 });
 
